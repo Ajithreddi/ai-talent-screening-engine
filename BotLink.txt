@@ -1,0 +1,3 @@
+Your smart HR assistant for resume analysis.
+
+Telegram Bot: https://t.me/chinn777bot

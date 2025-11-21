@@ -1,0 +1,1557 @@
+{
+  "name": "AI Talent Screening Engine (AI-TSE)",
+  "nodes": [
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"mobile_no\": \"\",\n  \"ats_score\": 0\n}\n\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        48,
+        1152
+      ],
+      "id": "925a06fe-5ed8-47c9-a78e-b51d75afbd81",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"mobile_no\": \"\",\n  \"ats_score\": 0\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        848,
+        1584
+      ],
+      "id": "9449161c-66b6-48bd-aa04-26fc7d4c13a6",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {
+          "download": true
+        }
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1040,
+        1024
+      ],
+      "id": "09385251-85e0-4d0e-86d7-c008a9953578",
+      "name": "Telegram Intake Trigger",
+      "webhookId": "33fffaa4-a146-4036-85a9-4443b51726bd",
+      "credentials": {
+        "telegramApi": {
+          "id": "TX29YUnL3R44Q5X6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "05b27dbe-15a7-44f8-bd12-77dec7980f6d",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "Hi",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "2d815439-fbcb-45e3-a0a7-b72febb181cc",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "Hello",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            },
+            {
+              "id": "5a3400e6-e87d-4feb-ae31-7ba842a622c2",
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": "Hey",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -816,
+        1024
+      ],
+      "id": "5ed82dbc-b38d-4e55-af5d-b191ed0decfa",
+      "name": "Message Type Check"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $json.message.chat.id }}",
+        "text": "=Hi {{ $json.message.from.first_name }},\n\nPlease upload your resume as a single PDF or a ZIP file containing multiple resumes. I will evaluate it and let you know the result.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -592,
+        928
+      ],
+      "id": "4c5fa500-437d-46f4-b68c-32b1d47dc8f9",
+      "name": "Default Reply to User",
+      "webhookId": "b0c9bd09-b8e6-4351-9f27-aedc3db581f9",
+      "credentials": {
+        "telegramApi": {
+          "id": "TX29YUnL3R44Q5X6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.document.file_name }}",
+                    "rightValue": ".pdf",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    },
+                    "id": "1f0db722-8e6f-4cd5-9b61-9cf91fb6adda"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "pdf"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": false,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1a686836-bc04-481b-9593-f59780b56fc8",
+                    "leftValue": "={{ $json.message.document.file_name }}",
+                    "rightValue": ".zip",
+                    "operator": {
+                      "type": "string",
+                      "operation": "endsWith"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "zip"
+            }
+          ]
+        },
+        "options": {
+          "ignoreCase": true
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        -592,
+        1120
+      ],
+      "id": "d314b07b-47cc-404f-bb22-f17c2e79a2da",
+      "name": "Resume File Router"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.compression",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        1360
+      ],
+      "id": "9b8cec8b-1f8f-485d-b3ad-ee23ac828031",
+      "name": "Resume File Decompressor"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "$binary",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        1360
+      ],
+      "id": "00a53d32-d035-48f5-b78e-6303493c8532",
+      "name": "Resume Splitter"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": false
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        256,
+        1360
+      ],
+      "id": "fcad7331-a7a2-4f80-95ac-0737dc6b9763",
+      "name": "Multi-Resume Loop Processor"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.1,
+          "topK": 1,
+          "topP": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        704,
+        1584
+      ],
+      "id": "9431c0ec-af3b-40c8-a442-afa3c4dbf94c",
+      "name": "Gemini Screening Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QcX6onPNcaAyJEiH",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "efc9014c-49f5-4a55-98d4-278190b92c6a",
+              "name": "Name",
+              "value": "={{ $json.output.name }}",
+              "type": "string"
+            },
+            {
+              "id": "791c107f-9d58-49a8-8397-bed115e7718e",
+              "name": "Email",
+              "value": "={{ $json.output.email }}",
+              "type": "string"
+            },
+            {
+              "id": "ba5bc596-626d-49ca-9d11-3eb41a23a2a9",
+              "name": "Mobile Number",
+              "value": "={{ $json.output.mobile_no }}",
+              "type": "number"
+            },
+            {
+              "id": "76f05ebe-4b97-4939-bf71-9489bb15eb35",
+              "name": "ATS Score",
+              "value": "={{ $json.output.ats_score }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1056,
+        1376
+      ],
+      "id": "bfa9fea1-c6a1-437a-861b-e7ee99068c03",
+      "name": "Normalized Resume Fields 1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "efc9014c-49f5-4a55-98d4-278190b92c6a",
+              "name": "Name",
+              "value": "={{ $json.output.name }}",
+              "type": "string"
+            },
+            {
+              "id": "791c107f-9d58-49a8-8397-bed115e7718e",
+              "name": "Email",
+              "value": "={{ $json.output.email }}",
+              "type": "string"
+            },
+            {
+              "id": "ba5bc596-626d-49ca-9d11-3eb41a23a2a9",
+              "name": "Mobile Number",
+              "value": "={{ $json.output.mobile_no }}",
+              "type": "number"
+            },
+            {
+              "id": "76f05ebe-4b97-4939-bf71-9489bb15eb35",
+              "name": "ATS Score",
+              "value": "={{ $json.output.ats_score }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        256,
+        928
+      ],
+      "id": "3cc761e3-49d0-4840-88c7-1e097f1dc63a",
+      "name": "Normalized Resume Fields"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0.1,
+          "topK": 1,
+          "topP": 1
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -96,
+        1152
+      ],
+      "id": "db59c9a2-965e-4da1-8223-354b4c15df6a",
+      "name": "Gemini Screening Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "QcX6onPNcaAyJEiH",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Below is the extracted text from a candidate's resume.\nEvaluate it ONLY for ATS relevance and job fit.\n\nTarget Role: AI/ML Engineer\n\nImportant Instructions:\n- Use ONLY the given resume text.\n- Do NOT assume or create information.\n- Follow the JSON keys exactly as defined.\n- Output strictly valid JSON and nothing else.\n\nResume Text:\n{{ $json.text }}\n\nReturn ONLY valid JSON following this schema:\n{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"mobile_no\": \"\",\n  \"ats_score\": 0\n}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a highly experienced HR Director, Senior Talent Acquisition Specialist, and ATS Optimization Expert with 20+ years of experience.\n\nYour task:\n- Extract ONLY factual data from the provided resume text.\n- Score the resume strictly for the target role using the weighted ATS scoring model below.\n- Do NOT fabricate or assume missing information.\n- The ATS score must be an INTEGER from 0 to 100.\n\nExtraction Rules:\n- Extract the name EXACTLY as written in the resume, then convert it to Title Case.\n- Extract the email EXACTLY as written.\n- Extract the mobile number as digits only (no spaces, symbols, or country codes).\n- If any field is missing, output an empty string or 0.\n\nWeighted ATS Scoring Model:\nYou must evaluate the resume using the following category weights:\n\n- Skills Match: 40%\n- Projects Relevance: 25%\n- Experience Alignment: 20%\n- Education: 10%\n- Certifications: 5%\n\nScoring Requirements:\n- Score each category individually based ONLY on resume text.\n- Apply the correct weight percentages.\n- Combine the weighted values to produce a final ATS score from 0 to 100.\n- The final ATS score MUST be an integer (no decimals).\n\nOutput Rules:\n- Output ONLY valid JSON.\n- Do NOT include explanations, comments, markdown, or extra text.\n- Do NOT include trailing commas.\n- Keys MUST match the schema exactly.\n- ats_score MUST be an integer between 0 and 100.\n\nOutput Schema (strict):\n{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"mobile_no\": \"\",\n  \"ats_score\": 0\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        704,
+        1376
+      ],
+      "id": "a5383a90-e0e7-4a35-9e5a-8a274b068b67",
+      "name": "AI Screening Agent 2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Below is the extracted text from a candidate's resume.\nEvaluate it ONLY for ATS relevance and job fit.\n\nTarget Role: AI/ML Engineer\n\nImportant Instructions:\n- Use ONLY the given resume text.\n- Do NOT assume or create information.\n- Follow the JSON keys exactly as defined.\n- Output strictly valid JSON and nothing else.\n\nResume Text:\n{{ $json.text }}\n\nReturn ONLY valid JSON following this schema:\n{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"mobile_no\": \"\",\n  \"ats_score\": 0\n}\n",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a highly experienced HR Director, Senior Talent Acquisition Specialist, and ATS Optimization Expert with 20+ years of experience.\n\nYour task:\n- Extract ONLY factual data from the provided resume text.\n- Score the resume strictly for the target role using the weighted ATS scoring model below.\n- Do NOT fabricate or assume missing information.\n- The ATS score must be an INTEGER from 0 to 100.\n\nExtraction Rules:\n- Extract the name EXACTLY as written in the resume, then convert it to Title Case.\n- Extract the email EXACTLY as written.\n- Extract the mobile number as digits only (no spaces, symbols, or country codes).\n- If any field is missing, output an empty string or 0.\n\nWeighted ATS Scoring Model:\nYou must evaluate the resume using the following category weights:\n\n- Skills Match: 40%\n- Projects Relevance: 25%\n- Experience Alignment: 20%\n- Education: 10%\n- Certifications: 5%\n\nScoring Requirements:\n- Score each category individually based ONLY on resume text.\n- Apply the correct weight percentages.\n- Combine the weighted values to produce a final ATS score from 0 to 100.\n- The final ATS score MUST be an integer (no decimals).\n\nOutput Rules:\n- Output ONLY valid JSON.\n- Do NOT include explanations, comments, markdown, or extra text.\n- Do NOT include trailing commas.\n- Keys MUST match the schema exactly.\n- ats_score MUST be an integer between 0 and 100.\n\nOutput Schema (strict):\n{\n  \"name\": \"\",\n  \"email\": \"\",\n  \"mobile_no\": \"\",\n  \"ats_score\": 0\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        -96,
+        928
+      ],
+      "id": "80621f15-5f4e-425f-8552-15de8d265871",
+      "name": "AI Screening Agent 1"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "={{$binary.keys()[0]}}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        1376
+      ],
+      "id": "e5369825-928b-48cb-a783-1516d13f6052",
+      "name": "Resume Text Extractor1"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        -320,
+        928
+      ],
+      "id": "257f076f-ecb7-49dc-82fc-c5d40896429a",
+      "name": "Resume Text Extractor"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "98042897-3920-4659-8d64-3dc12280abba",
+              "leftValue": "={{ $json['ATS Score'] }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "d9b5eae7-8002-49b2-a29e-54038adc2489",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        928
+      ],
+      "id": "52f24c4e-77ff-4fb3-93d4-826916e8847d",
+      "name": "Candidate Decision Check"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "98042897-3920-4659-8d64-3dc12280abba",
+              "leftValue": "={{ $json['ATS Score'] }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "d9b5eae7-8002-49b2-a29e-54038adc2489",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1280,
+        1376
+      ],
+      "id": "fb3b58bc-675f-45ee-a3c5-38c1c0efe6fe",
+      "name": "Candidate Decision Check1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U",
+          "mode": "list",
+          "cachedResultName": "HR_Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Accepted",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mobile Number",
+              "displayName": "Mobile Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ATS Score",
+              "displayName": "ATS Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        832
+      ],
+      "id": "af09ae98-c091-44c5-9d87-faca731c0118",
+      "name": "Accepted Candidates Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EIIANfKPFOoQjaQC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U",
+          "mode": "list",
+          "cachedResultName": "HR_Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Accepted",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mobile Number",
+              "displayName": "Mobile Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ATS Score",
+              "displayName": "ATS Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1504,
+        1264
+      ],
+      "id": "56588eb4-650a-431c-bd10-ff1326f8f0ad",
+      "name": "Accepted Candidates Sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EIIANfKPFOoQjaQC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U",
+          "mode": "list",
+          "cachedResultName": "HR_Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1034357780,
+          "mode": "list",
+          "cachedResultName": "Rejected",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U/edit#gid=1034357780"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mobile Number",
+              "displayName": "Mobile Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ATS Score",
+              "displayName": "ATS Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        1024
+      ],
+      "id": "5eb962f8-7379-447c-8fe6-f88e820476a6",
+      "name": "Rejected Candidates Sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EIIANfKPFOoQjaQC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U",
+          "mode": "list",
+          "cachedResultName": "HR_Data",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1034357780,
+          "mode": "list",
+          "cachedResultName": "Rejected",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1i7bvMeX4P_itujwSh2MUCEPV2QAJ85k7V7pccJYhu8U/edit#gid=1034357780"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Mobile Number",
+              "displayName": "Mobile Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ATS Score",
+              "displayName": "ATS Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1504,
+        1456
+      ],
+      "id": "ca129412-117f-460d-9c45-3a5cc139c333",
+      "name": "Rejected Candidates Sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "EIIANfKPFOoQjaQC",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "=Your Resume Has Been Shortlisted",
+        "emailType": "text",
+        "message": "=Hi {{ $json.Name }},\n\nThank you for your interest in the AI/ML Engineer position. We are pleased to inform you that your resume has been shortlisted based on your strong profile and ATS score. \n\nWe will contact you soon with the next steps.\n\nRegards,\nHR Team",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1056,
+        832
+      ],
+      "id": "330d2f72-1aa0-42a6-b5c4-d1b6520c9255",
+      "name": "Send Acceptance Email",
+      "webhookId": "c7d1fd52-3501-4534-8db6-7605be34fcc4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Gf7mr6KdetKg42zk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "=Your Resume Has Been Shortlisted",
+        "emailType": "text",
+        "message": "=Hi {{ $json.Name }},\n\nThank you for your interest in the AI/ML Engineer position. We are pleased to inform you that your resume has been shortlisted based on your strong profile and ATS score. \n\nWe will contact you soon with the next steps.\n\nRegards,\nHR Team",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1728,
+        1264
+      ],
+      "id": "835d8989-2546-4845-9de7-25bf1e481eda",
+      "name": "Send Acceptance Email1",
+      "webhookId": "75c267bb-b979-4087-9c8e-678debf20be8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Gf7mr6KdetKg42zk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "=Update on Your Application",
+        "emailType": "text",
+        "message": "=Hi  {{ $json.Name }},\n\nThank you for your interest in the AI/ML Engineer position. After reviewing your resume, we will not be moving forward with your application at this time.\n\nWe appreciate the time you invested and encourage you to apply again in the future as suitable roles become available.\n\nRegards,\nHR Team\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1056,
+        1024
+      ],
+      "id": "2fdc6620-11cf-412f-840a-55862107415a",
+      "name": "Send Rejection Email",
+      "webhookId": "7a89f945-cfcd-4678-b992-b0d527020e94",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Gf7mr6KdetKg42zk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "=Update on Your Application",
+        "emailType": "text",
+        "message": "=Hi  {{ $json.Name }},\n\nThank you for your interest in the AI/ML Engineer position. After reviewing your resume, we will not be moving forward with your application at this time.\n\nWe appreciate the time you invested and encourage you to apply again in the future as suitable roles become available.\n\nRegards,\nHR Team\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1728,
+        1456
+      ],
+      "id": "322c3a55-00e4-4817-a9a0-202b717aa44c",
+      "name": "Send Rejection Email1",
+      "webhookId": "093ea0eb-1906-44f5-ba23-8ab0cd1e9b83",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Gf7mr6KdetKg42zk",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1280,
+        928
+      ],
+      "id": "e3c8e82a-b3fa-4028-9ed2-c88bf3b31295",
+      "name": "Combine Candidate Results"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1952,
+        1360
+      ],
+      "id": "c2317c8a-4341-49cc-be02-244cb6182dca",
+      "name": "Combine Candidate Results1"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Intake Trigger').item.json.message.chat.id }}",
+        "text": "=Name: {{ $('Normalized Resume Fields').item.json.Name }}\nResume Score: {{ $('Normalized Resume Fields').item.json['ATS Score'] }}\n\nResume screening is completed. Please check your email for your result.\n",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1504,
+        928
+      ],
+      "id": "eca0d284-5b66-4509-85bb-41c74147eae4",
+      "name": "Send Final Screening Result",
+      "webhookId": "58788e61-897a-4ca3-9d9d-254800ac1d8b",
+      "credentials": {
+        "telegramApi": {
+          "id": "TX29YUnL3R44Q5X6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Intake Trigger').item.json.message.chat.id }}",
+        "text": "=Resume screening is completed. Please check your email's for your result.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        1184
+      ],
+      "id": "645e3fdf-c1cc-41c2-b13b-e6795ffef14a",
+      "name": "Send Final Screening Report",
+      "webhookId": "1d347ec8-5a27-4e26-9674-4bd036ee057b",
+      "executeOnce": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "TX29YUnL3R44Q5X6",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2176,
+        1552
+      ],
+      "id": "8c5a0d5a-eba6-4a76-aacb-4d220c0b92c1",
+      "name": "Process Sleep Timer",
+      "webhookId": "123ee48a-308e-48dd-9deb-bc5f65486c47"
+    },
+    {
+      "parameters": {
+        "content": "INPUT LAYER\n\nReceives resume submissions via Telegram and routes them based on file type (PDF or ZIP).",
+        "height": 432,
+        "width": 628
+      },
+      "id": "5b09daa5-b122-415a-ab3c-3fd09155fdb6",
+      "name": "Input Layer Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        848
+      ]
+    },
+    {
+      "parameters": {
+        "content": "RESUME PROCESSING LAYER\n\nExtracts text from PDF files and handles text processing ",
+        "height": 476,
+        "width": 244
+      },
+      "id": "6c4288bf-f101-4a08-a821-931129495e75",
+      "name": "Resume Processing Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "content": "AI SCREENING LAYER\n\nUses Gemini AI to analyze resumes, extract candidate information, and calculate ATS scores based on job requirements.",
+        "height": 484,
+        "width": 292
+      },
+      "id": "af4b165d-36fb-4e4b-a38c-6587cc986855",
+      "name": "AI Screening Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        800
+      ]
+    },
+    {
+      "parameters": {
+        "content": "DECISION LOGIC LAYER\n\nEvaluates ATS scores and routes candidates to acceptance or rejection paths. Stores results in Google Sheets.",
+        "height": 436,
+        "width": 500
+      },
+      "id": "f353b6c9-d77e-49b7-a90e-ab1fcdaba084",
+      "name": "Decision Logic Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "content": "📧 NOTIFICATION LAYER\n\nSends personalized emails to candidates and Telegram notifications to the recruiter with screening results.",
+        "height": 436,
+        "width": 780
+      },
+      "id": "23b102fa-c0e0-4ff5-a1a1-e560415ac0ab",
+      "name": "Notification Layer Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        960,
+        736
+      ]
+    },
+    {
+      "parameters": {
+        "content": "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nRESUME PROCESSING LAYER\n\nExtracts text from PDF files and handles batch processing for multiple resumes in ZIP files.",
+        "height": 364,
+        "width": 1076
+      },
+      "id": "2cadb6ac-7179-4fde-baa9-e162cc18b51e",
+      "name": "Resume Processing Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -448,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "content": "AI SCREENING LAYER\n\nUses Gemini AI to analyze resumes",
+        "height": 484,
+        "width": 308
+      },
+      "id": "aac7efa4-87d4-4059-9f44-78091fe24883",
+      "name": "AI Screening Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        672,
+        1280
+      ]
+    },
+    {
+      "parameters": {
+        "content": "DECISION LOGIC LAYER\n",
+        "height": 500,
+        "width": 404
+      },
+      "id": "547dcc16-9587-49fc-a7e6-f7484211e1d8",
+      "name": "Decision Logic Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "content": "📧 NOTIFICATION LAYER\n",
+        "height": 500,
+        "width": 412
+      },
+      "id": "23b1dcdc-8782-490f-9d96-3d466dddfa98",
+      "name": "Notification Layer Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1680,
+        1216
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## I'm a note \nAutomated Resume Screening System (ARSS)"
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -976,
+        1408
+      ],
+      "typeVersion": 1,
+      "id": "67db1641-87ed-45ac-97f2-f658c2126370",
+      "name": "Sticky Note"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Screening Agent 1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Screening Agent 2",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Intake Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message Type Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message Type Check": {
+      "main": [
+        [
+          {
+            "node": "Default Reply to User",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resume File Router",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume File Router": {
+      "main": [
+        [
+          {
+            "node": "Resume Text Extractor",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resume File Decompressor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume File Decompressor": {
+      "main": [
+        [
+          {
+            "node": "Resume Splitter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Splitter": {
+      "main": [
+        [
+          {
+            "node": "Multi-Resume Loop Processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Multi-Resume Loop Processor": {
+      "main": [
+        [
+          {
+            "node": "Send Final Screening Report",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Resume Text Extractor1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Screening Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Screening Agent 2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalized Resume Fields 1": {
+      "main": [
+        [
+          {
+            "node": "Candidate Decision Check1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalized Resume Fields": {
+      "main": [
+        [
+          {
+            "node": "Candidate Decision Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Screening Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Screening Agent 1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Screening Agent 2": {
+      "main": [
+        [
+          {
+            "node": "Normalized Resume Fields 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Screening Agent 1": {
+      "main": [
+        [
+          {
+            "node": "Normalized Resume Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Text Extractor1": {
+      "main": [
+        [
+          {
+            "node": "AI Screening Agent 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Resume Text Extractor": {
+      "main": [
+        [
+          {
+            "node": "AI Screening Agent 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Candidate Decision Check": {
+      "main": [
+        [
+          {
+            "node": "Accepted Candidates Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rejected Candidates Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Candidate Decision Check1": {
+      "main": [
+        [
+          {
+            "node": "Accepted Candidates Sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rejected Candidates Sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accepted Candidates Sheet": {
+      "main": [
+        [
+          {
+            "node": "Send Acceptance Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Accepted Candidates Sheet1": {
+      "main": [
+        [
+          {
+            "node": "Send Acceptance Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rejected Candidates Sheet": {
+      "main": [
+        [
+          {
+            "node": "Send Rejection Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rejected Candidates Sheet1": {
+      "main": [
+        [
+          {
+            "node": "Send Rejection Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Acceptance Email": {
+      "main": [
+        [
+          {
+            "node": "Combine Candidate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Acceptance Email1": {
+      "main": [
+        [
+          {
+            "node": "Combine Candidate Results1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Rejection Email": {
+      "main": [
+        [
+          {
+            "node": "Combine Candidate Results",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Send Rejection Email1": {
+      "main": [
+        [
+          {
+            "node": "Combine Candidate Results1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Combine Candidate Results": {
+      "main": [
+        [
+          {
+            "node": "Send Final Screening Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Candidate Results1": {
+      "main": [
+        [
+          {
+            "node": "Process Sleep Timer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Sleep Timer": {
+      "main": [
+        [
+          {
+            "node": "Multi-Resume Loop Processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "acc31655-1819-4046-88da-39ff622b3581",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "9ddda1fe733e1f176f1eacec2efe1d757880117a1990643aef0e4430c1ac5472"
+  },
+  "id": "g520Xq6IL7FyUjza",
+  "tags": []
+}
