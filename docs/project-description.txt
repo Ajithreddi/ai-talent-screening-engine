@@ -1,0 +1,72 @@
+AI Talent Screening Engine (AI-TSE)
+
+AI Talent Screening Engine (AI-TSE) is an automated hiring assistant designed to streamline the resume screening and evaluation process for IT companies and HR teams.
+The system accepts resumes through a Telegram bot, processes and extracts resume text, applies AI-driven screening through a Large Language Model (Gemini), and produces structured candidate evaluations including skills, experience, match scores, and final recommendations.
+
+The workflow is built using n8n, a low-code automation tool, and integrates with:
+
+* Telegram for resume intake
+* Google Gemini for AI evaluation
+* Google Sheets for accepted/rejected records
+* Gmail for acceptance/rejection notifications
+
+Key Capabilities:
+
+1. Automated Resume Intake
+   Users upload one or more resumes via Telegram.
+
+2. Resume Processing Pipeline
+   The system automatically handles:
+
+   * File routing
+   * ZIP decompression
+   * Splitting multiple resumes
+   * PDF/DOCX text extraction
+
+3. AI-Based Resume Screening
+   Gemini analyzes resumes and returns structured data:
+
+   * Candidate Name
+   * Technical and Soft Skills
+   * Experience Summary
+   * Strengths and Weaknesses
+   * Match Score
+   * Recommended Decision
+
+4. Decision Logic
+   Candidates are automatically classified as:
+
+   * Accepted
+   * Rejected
+
+5. Automated Notifications
+   The system sends:
+
+   * Acceptance emails
+   * Rejection emails
+   * Final screening summary via Telegram
+
+6. Data Storage
+   All results are stored in separate Google Sheets for HR review.
+
+Project Architecture Layers:
+
+1. Input Layer
+   Telegram triggers and message type validation.
+
+2. Resume Processing Layer
+   File handling, extraction, and preparation.
+
+3. AI Screening Layer
+   LLM evaluation and structured output parsing.
+
+4. Decision Logic Layer
+   Acceptance/Rejection classification.
+
+5. Notification Layer
+   Email and Telegram delivery, and Google Sheets updates.
+
+Purpose:
+
+AI-TSE helps organizations reduce manual workload, increase accuracy in candidate evaluation, and accelerate the recruitment process.
+It is especially useful for teams dealing with large volumes of resumes and requiring fast, consistent, AI-supported decisions.
